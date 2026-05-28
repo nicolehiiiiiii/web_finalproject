@@ -230,14 +230,14 @@
     .video-dot {
       width: 8px; height: 8px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.2);   /* 改這行 */
+      background: rgba(0,0,0,0.2);
       cursor: pointer;
       transition: background var(--t-fast), transform var(--t-fast);
       border: none;
     }
 
     .video-dot.active {
-      background: var(--clr-primary);  /* 改這行 */
+      background: var(--clr-primary);
       transform: scale(1.3);
     }
 
@@ -320,13 +320,36 @@
       flex-shrink: 0;
     }
 
+    /* --- 平面地圖專屬樣式 --- */
+    .map-marker {
+      transition: transform 0.2s, fill 0.2s, stroke-width 0.2s;
+      transform-origin: center;
+    }
+    .map-marker:hover, .map-marker.active {
+      fill: #cf7500 !important;
+      stroke: #fff !important;
+      stroke-width: 3px !important;
+      transform: scale(1.3);
+    }
+    .map-text {
+      font-family: var(--ff-body);
+      pointer-events: none;
+      user-select: none;
+    }
+
     @keyframes floatMouse {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-6px); }
     }
 
+    @media (max-width: 992px) {
+      .competition-layout {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     @media (max-width: 768px) {
-      .video-item { width: 80%; margin: 0 2%; }
+      .hero-grid { grid-template-columns: 1fr !important; }
     }
 
     @media (max-width: 600px) {
@@ -334,38 +357,31 @@
       .issues-grid { grid-template-columns: 1fr; }
       .video-item { width: 90%; margin: 0 1%; }
     }
-    @media (max-width: 768px) {
-      .hero-grid { grid-template-columns: 1fr !important; }
-    }
   </style>
 </head>
 <body>
   <script src="../js/navbar.js"></script>
 
-  <!-- Page hero -->
   <section class="section" style="background:linear-gradient(160deg,rgba(234,243,230,0.85) 0%,rgba(245,242,234,0.85) 70%);  padding-bottom:var(--sp-sm)">
-  <div class="container">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-2xl); align-items:flex-start">
-      <!-- 左：標題 -->
-      <div>
-        <span class="badge badge-brown" style="margin-bottom:var(--sp-md)">問題區</span>
-        <h1>六大環境問題<br/>你了解幾個？</h1>
-      </div>
-      <!-- 右：影片輪播 -->
-      <div style="align-self:flex-start; margin-top:0;">
-        <div id="videoCarouselWrap" style="position:relative; overflow: hidden; padding-right: 60px;">
-          <div id="videoTrack" style="display:flex; align-items:center; transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)"></div>
-          <button class="video-nav-btn prev" id="videoPrev" style="top:40%">‹</button>
-          <button class="video-nav-btn next" id="videoNext" style="top:40%">›</button>
+    <div class="container">
+      <div class="hero-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-2xl); align-items:flex-start">
+        <div>
+          <span class="badge badge-brown" style="margin-bottom:var(--sp-md)">問題區</span>
+          <h1>六大環境問題<br/>你了解幾個？</h1>
         </div>
-        <div class="video-dots" id="videoDots"></div>
+        <div style="align-self:flex-start; margin-top:0;">
+          <div id="videoCarouselWrap" style="position:relative; overflow: hidden; padding-right: 60px;">
+            <div id="videoTrack" style="display:flex; align-items:center; transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)"></div>
+            <button class="video-nav-btn prev" id="videoPrev" style="top:40%">‹</button>
+            <button class="video-nav-btn next" id="videoNext" style="top:40%">›</button>
+          </div>
+          <div class="video-dots" id="videoDots"></div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-  <!-- Main -->
-  <section class="section" style="padding-top:var(--sp-lg);">
+  <section class="section" style="padding-top:var(--sp-lg); padding-bottom: var(--sp-lg);">
     <div class="container">
       <div class="filter-bar" id="filterBar">
         <button class="filter-btn active" data-filter="all">全部</button>
@@ -388,7 +404,132 @@
     </div>
   </section>
 
-  <!-- Modal -->
+  <section class="section" style="padding-top:var(--sp-xl); padding-bottom:var(--sp-2xl); border-top: 1px solid var(--clr-border);">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom:var(--sp-xs)">🌍 全球環保行動競賽地圖</h2>
+      <p style="color:var(--clr-muted); margin-bottom:var(--sp-xl); font-size:0.95rem">選擇你的所在地並回報你實踐的環保行動。為你的國家累計票數，激發全球環保良性競爭！</p>
+      
+      <div class="competition-layout" style="display:grid; grid-template-columns: 1.3fr 1fr; gap:var(--sp-xl); align-items:start">
+        
+        <div style="background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius-xl); padding: var(--sp-lg); box-shadow: var(--shadow-sm);">
+          <div style="font-size: 0.8rem; color: var(--clr-muted); margin-bottom: var(--sp-sm); display: flex; justify-content: space-between;">
+            <span>🗺️ 點擊地圖上的定位圓點可直接切換觀看該國數據</span>
+            <span id="mapHint" style="color: var(--clr-primary); font-weight: 600;">當前顯示：台灣</span>
+          </div>
+          
+          <div style="width: 100%; overflow-x: auto;">
+            <svg id="planeMapSvg" viewBox="0 0 1000 500" style="width: 100%; height: auto; display: block; background: #eef5ed; border-radius: var(--radius-md);">
+              <path d="M0,125 L1000,125 M0,250 L1000,250 M0,375 L1000,375" stroke="rgba(0,0,0,0.03)" stroke-width="1" stroke-dasharray="5,5" />
+              <path d="M200,0 L200,500 M400,0 L400,500 M600,0 L600,500 M800,0 L800,500" stroke="rgba(0,0,0,0.03)" stroke-width="1" stroke-dasharray="5,5" />
+
+              <path d="M50,50 Q120,40 250,70 T350,150 Q300,220 220,220 T100,180 Z" fill="#c2d6bc" opacity="0.65"/>
+              <path d="M220,230 Q280,250 320,290 T280,450 Q250,480 230,420 T200,300 Z" fill="#b3cbab" opacity="0.65"/>
+              <path d="M420,180 Q520,140 560,200 T610,320 Q540,380 480,350 T430,240 Z" fill="#cbd6be" opacity="0.65"/>
+              <path d="M420,140 Q500,40 700,50 T900,100 Q950,180 850,260 T650,220 Q550,230 450,180 Z" fill="#bfd3b8" opacity="0.65"/>
+              <path d="M800,320 Q880,310 900,350 T830,420 Q760,400 800,320 Z" fill="#cbd1b4" opacity="0.65"/>
+
+              <g style="cursor: pointer;">
+                <circle cx="785" cy="185" r="14" class="map-marker" data-code="TW" fill="#4a7c59" stroke="#fff" stroke-width="1.5" />
+                <text x="785" y="210" font-size="12" font-weight="bold" fill="#222" class="map-text" text-anchor="middle">台灣</text>
+
+                <circle cx="825" cy="135" r="12" class="map-marker" data-code="JP" fill="#4a7c59" stroke="#fff" stroke-width="1.5" />
+                <text x="825" y="118" font-size="11" fill="#444" class="map-text" text-anchor="middle">日本</text>
+
+                <circle cx="765" cy="145" r="11" class="map-marker" data-code="KR" fill="#4a7c59" stroke="#fff" stroke-width="1.5" />
+                <text x="765" y="130" font-size="11" fill="#444" class="map-text" text-anchor="middle">韓國</text>
+
+                <circle cx="715" cy="180" r="12" class="map-marker" data-code="CN" fill="#4a7c59" stroke="#fff" stroke-width="1.5" />
+                <text x="715" y="200" font-size="11" fill="#444" class="map-text" text-anchor="middle">中國</text>
+
+                <circle cx="655" cy="215" r="11" class="map-marker" data-code="IN" fill="#4a7c59" stroke="#fff" stroke-width="1.5" />
+                <text x="655" y="235" font-size="11" fill="#444" class="map-text" text-anchor="middle">印度</text>
+
+                <circle cx="735" cy="245" r="10" class="map-marker" data-code="SG" fill="#4a7c59" stroke="#fff" stroke-width="1.5" />
+                <text x="735" y="262" font-size="10" fill="#444" class="map-text" text-anchor="middle">新加坡</text>
+
+                <circle cx="495" cy="100" r="12" class="map-marker" data-code="FR" fill="#5c8469" stroke="#fff" stroke-width="1.5" />
+                <text x="495" y="85" font-size="11" fill="#444" class="map-text" text-anchor="middle">法國</text>
+
+                <circle cx="525" cy="95" r="11" class="map-marker" data-code="DE" fill="#5c8469" stroke="#fff" stroke-width="1.5" />
+                <text x="525" y="112" font-size="11" fill="#444" class="map-text" text-anchor="middle">德國</text>
+
+                <circle cx="470" cy="85" r="11" class="map-marker" data-code="UK" fill="#5c8469" stroke="#fff" stroke-width="1.5" />
+                <text x="470" y="70" font-size="11" fill="#444" class="map-text" text-anchor="middle">英國</text>
+
+                <circle cx="210" cy="120" r="13" class="map-marker" data-code="US" fill="#688f74" stroke="#fff" stroke-width="1.5" />
+                <text x="210" y="102" font-size="11" fill="#444" class="map-text" text-anchor="middle">美國</text>
+
+                <circle cx="195" cy="80" r="11" class="map-marker" data-code="CA" fill="#688f74" stroke="#fff" stroke-width="1.5" />
+                <text x="195" y="65" font-size="11" fill="#444" class="map-text" text-anchor="middle">加拿大</text>
+
+                <circle cx="270" cy="310" r="12" class="map-marker" data-code="BR" fill="#688f74" stroke="#fff" stroke-width="1.5" />
+                <text x="270" y="328" font-size="11" fill="#444" class="map-text" text-anchor="middle">巴西</text>
+
+                <circle cx="535" cy="270" r="11" class="map-marker" data-code="KE" fill="#7ba087" stroke="#fff" stroke-width="1.5" />
+                <text x="535" y="288" font-size="11" fill="#444" class="map-text" text-anchor="middle">肯亞</text>
+
+                <circle cx="845" cy="370" r="12" class="map-marker" data-code="AU" fill="#7ba087" stroke="#fff" stroke-width="1.5" />
+                <text x="845" y="390" font-size="11" fill="#444" class="map-text" text-anchor="middle">澳洲</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div id="competitionPanel">
+          <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius-lg); padding:var(--sp-xl); box-shadow: var(--shadow-sm);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-md);">
+              <div style="font-size:2rem;" id="compCountryIcon">🇹尋</div>
+              <span class="badge badge-brown" style="font-size: 0.8rem; letter-spacing: 0.5px;">🏆 環保貢獻爭奪戰</span>
+            </div>
+            
+            <h3 id="compCountryTitle" style="margin-bottom:var(--sp-xs)">台灣 (Taiwan) 戰況</h3>
+            <p style="color:var(--clr-muted); font-size:0.88rem; margin-bottom:var(--sp-md)">
+              勾選或選擇你在日常生活中響應的預設六大環保行動選項，為自己的所在地衝高排行積分！
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: var(--sp-sm); margin-bottom: var(--sp-lg); background: rgba(0,0,0,0.02); padding: var(--sp-md); border-radius: var(--radius-md);">
+              
+              <div>
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--clr-dark); display:block; margin-bottom:4px;">1. 當前選擇國家：</label>
+                <select id="compCountrySelect" style="width: 100%; padding: 0.6rem; border-radius: var(--radius-md); border: 1px solid var(--clr-border); font-family: var(--ff-body); background:#fff;">
+                  </select>
+              </div>
+
+              <div>
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--clr-dark); display:block; margin-bottom:4px;">2. 選擇你實踐的環保行動 (對應上方6大問題)：</label>
+                <select id="compActionSelect" style="width: 100%; padding: 0.6rem; border-radius: var(--radius-md); border: 1px solid var(--clr-border); font-family: var(--ff-body); background:#fff;">
+                  <option value="consumption1">🛒 永續消費 (減少衝動購物)</option>
+                  <option value="pollution">🧴 減塑行動 (自備環保餐具)</option>
+                  <option value="waste1">🍱 珍惜食物 (吃多少點多少)</option>
+                  <option value="consumption2">👕 慢時尚 (支持二手衣或耐穿衣物)</option>
+                  <option value="waste2">💻 電子回收 (正確回收舊3C垃圾)</option>
+                  <option value="energy">⚡ 節能行動 (隨手關燈拔插頭)</option>
+                </select>
+              </div>
+
+              <button id="submitCompActionBtn" class="btn btn-primary" style="margin-top: 4px; width: 100%; justify-content: center; font-size:0.9rem; height:44px;">
+                🚀 我有做到！為國增添綠色積分
+              </button>
+            </div>
+
+            <div style="border-top: 1px dashed var(--clr-border); padding-top: var(--sp-md);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sp-sm);">
+                <h4 style="font-size: 0.88rem; font-weight: 600; color: var(--clr-primary);" id="compRankTitle">📊 國家內各行動人次排行</h4>
+                <button id="toggleGlobalRankBtn" style="background:none; border:none; color:var(--clr-primary); font-size:0.82rem; cursor:pointer; text-decoration:underline; font-weight: 500;">切換全球總積分排行 →</button>
+              </div>
+              
+              <div id="compLeaderboard" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: var(--sp-sm);">
+                </div>
+            </div>
+
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
   <div class="modal-overlay" id="modal" onclick="closeModal(event)">
     <div class="modal-box" id="modalBox">
       <button class="modal-close" onclick="closeModal()">✕</button>
@@ -418,7 +559,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer style="background:var(--clr-dark);color:rgba(255,255,255,0.6);padding:var(--sp-xl) 0;text-align:center;font-size:0.85rem">
     <div class="container">
       <p>🌿 EcoPulse &nbsp;|&nbsp; 問題區由 羅乃慈 負責製作</p>
@@ -482,13 +622,14 @@
       const track    = document.getElementById('videoTrack');
       const wrap     = document.getElementById('videoCarouselWrap');
 
+      if (!items.length) return;
+
       items.forEach((el, i) => {
         el.classList.toggle('active', i === currentVideo);
       });
 
       dotBtns.forEach((d, i) => d.classList.toggle('active', i === currentVideo));
 
-      // Calculate offset: center the active item
       const itemW     = items[0].offsetWidth;
       const style     = window.getComputedStyle(items[0]);
       const marginL   = parseFloat(style.marginLeft);
@@ -599,7 +740,7 @@
           '在糧食不均的世界中，浪費加劇了全球飢餓與資源分配不公的問題',
         ],
         solutions: [
-          '購物前確認冰箱庫存，制定一週菜單，減少衝動採購',
+          '購物前確認冰箱庫存，制定一週菜單，減少衝動採計',
           '了解食品標示差異：「最佳賞味期」≠「到期不能吃」',
           '學習食物保存技巧，利用剩食製作新料理',
           '使用 Too Good To Go 等 App 購買即將過期的特價食品',
@@ -719,7 +860,6 @@
       grid.innerHTML = filtered.map(issue => `
         <div class="flip-wrap" data-id="${issue.id}">
           <div class="flip-inner">
-            <!-- Front -->
             <div class="flip-front">
               <div>
                 <div class="issue-icon">${issue.icon}</div>
@@ -732,8 +872,7 @@
                 style="margin-top:var(--sp-sm);width:100%;justify-content:center;font-size:0.82rem;height:44px"
               >深入了解 →</button>
             </div>
-            <!-- Back -->
-              <div class="flip-back">
+            <div class="flip-back">
                 <div>
                   <div style="font-size:2.5rem; margin-bottom:var(--sp-sm)">${issue.backIcon}</div>
                   <div style="font-family:var(--ff-body); font-size:1.2rem; color:#fff; font-weight:700; margin-bottom:var(--sp-sm)">${issue.backTitle}</div>
@@ -818,9 +957,208 @@
       renderCards(btn.dataset.filter);
     });
 
-    // Init
+
+    /* ========================================================================
+       COMPETITION MAP ENGINE - 平面地圖與環保競賽引擎 (串聯預設6大核心行動)
+       ======================================================================== */
+    
+    // 行動與頂部6大問題核心選項完全對應
+    const COMP_ACTION_NAMES = {
+      consumption1: '永續消費',
+      pollution: '減塑行動',
+      waste1: '珍惜食物',
+      consumption2: '慢時尚',
+      waste2: '電子回收',
+      energy: '節能行動'
+    };
+
+    // 多達 14 個橫跨全球的主要國家/地區初始模擬數據 (滿足「國家越多越好」)
+    const GLOBAL_MAP_DATA = {
+      TW: { name: '台灣', icon: '🇹🇼', counts: { consumption1: 4520, pollution: 5890, waste1: 3210, consumption2: 2110, waste2: 1850, energy: 4920 } },
+      JP: { name: '日本', icon: '🇯🇵', counts: { consumption1: 3850, pollution: 4120, waste1: 5400, consumption2: 2900, waste2: 2180, energy: 4850 } },
+      KR: { name: '韓國', icon: '🇰🇷', counts: { consumption1: 2910, pollution: 3420, waste1: 3100, consumption2: 1980, waste2: 2450, energy: 3200 } },
+      CN: { name: '中國', icon: '🇨🇳', counts: { consumption1: 8900, pollution: 9500, waste1: 7600, consumption2: 4300, waste2: 6100, energy: 9800 } },
+      IN: { name: '印度', icon: '🇮🇳', counts: { consumption1: 4120, pollution: 6850, waste1: 5900, consumption2: 2110, waste2: 3450, energy: 7240 } },
+      SG: { name: '新加坡', icon: '🇸🇬', counts: { consumption1: 1820, pollution: 2450, waste1: 1910, consumption2: 1100, waste2: 1540, energy: 2100 } },
+      FR: { name: '法國', icon: '🇫🇷', counts: { consumption1: 2450, pollution: 3650, waste1: 2820, consumption2: 3540, waste2: 1810, energy: 2920 } },
+      DE: { name: '德國', icon: '🇩🇪', counts: { consumption1: 3100, pollution: 4890, waste1: 3420, consumption2: 2750, waste2: 3900, energy: 5120 } },
+      UK: { name: '英國', icon: '🇬🇧', counts: { consumption1: 2890, pollution: 3980, waste1: 2950, consumption2: 3120, waste2: 2200, energy: 4150 } },
+      US: { name: '美國', icon: '🇺🇸', counts: { consumption1: 6100, pollution: 8120, waste1: 7890, consumption2: 5250, waste2: 4930, energy: 8400 } },
+      CA: { name: '加拿大', icon: '🇨🇦', counts: { consumption1: 2150, pollution: 3420, waste1: 2100, consumption2: 1850, waste2: 1670, energy: 3100 } },
+      BR: { name: '巴西', icon: '🇧🇷', counts: { consumption1: 1960, pollution: 3430, waste1: 2950, consumption2: 1680, waste2: 1290, energy: 2720 } },
+      KE: { name: '肯亞', icon: '🇰🇪', counts: { consumption1: 920,  pollution: 2180, waste1: 1450, consumption2: 930,  waste2: 820,  energy: 1670 } },
+      AU: { name: '澳洲', icon: '🇦🇺', counts: { consumption1: 2280, pollution: 3740, waste1: 2350, consumption2: 2120, waste2: 1440, energy: 3110 } }
+    };
+
+    function initPlaneMapCompetition() {
+      const countrySelect = document.getElementById('compCountrySelect');
+      const actionSelect  = document.getElementById('compActionSelect');
+      const submitBtn     = document.getElementById('submitCompActionBtn');
+      const leaderboard   = document.getElementById('compLeaderboard');
+      const mapHint       = document.getElementById('mapHint');
+      const countryIcon   = document.getElementById('compCountryIcon');
+      const countryTitle  = document.getElementById('compCountryTitle');
+      const rankTitle     = document.getElementById('compRankTitle');
+      const toggleRankBtn = document.getElementById('toggleGlobalRankBtn');
+      const mapMarkers    = document.querySelectorAll('.map-marker');
+
+      let currentMode = 'country';   // 'country' 模式查看單國六項排行，'global' 模式查看全球總積分競技榜
+      let activeCode = 'TW';         // 預設初始化選取台灣
+
+      // 動態渲染生成下拉選單的國家選項
+      countrySelect.innerHTML = Object.keys(GLOBAL_MAP_DATA).map(code => {
+        const c = GLOBAL_MAP_DATA[code];
+        return `<option value="${code}">${c.icon} ${c.name} (${code})</option>`;
+      }).join('');
+      countrySelect.value = activeCode;
+
+      // 輔助函式：計算某一國家的六大環保行動總人次
+      function getCountryTotalPoints(code) {
+        return Object.values(GLOBAL_MAP_DATA[code].counts).reduce((a, b) => a + b, 0);
+      }
+
+      // 核心渲染器：更新排行榜
+      function updateRankingsView() {
+        if (currentMode === 'country') {
+          // 渲染單一國家內部的六大環保行動對決
+          const country = GLOBAL_MAP_DATA[activeCode];
+          countryIcon.textContent = country.icon;
+          countryTitle.textContent = `${country.name} 行動戰況`;
+          rankTitle.textContent = `📊 ${country.name} 各行動參與人次`;
+          toggleRankBtn.textContent = '切換全球總積分排行 →';
+          mapHint.textContent = `當前顯示：${country.name}`;
+
+          // 將六個行動項目依照人數高低進行排序
+          const sortedActions = Object.keys(country.counts).map(actKey => {
+            return { key: actKey, name: COMP_ACTION_NAMES[actKey], count: country.counts[actKey] };
+          }).sort((a, b) => b.count - a.count);
+
+          const maxVal = sortedActions[0].count || 1;
+
+          leaderboard.innerHTML = sortedActions.map((act, idx) => {
+            const pct = (act.count / maxVal) * 100;
+            let medal = `${idx + 1}.`;
+            if (idx === 0) medal = '🥇';
+            if (idx === 1) medal = '🥈';
+            if (idx === 2) medal = '🥉';
+
+            return `
+              <div style="margin-bottom: 2px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:2px; font-size:0.85rem;">
+                  <span><strong>${medal}</strong> ${act.name}</span>
+                  <span style="color:var(--clr-primary); font-weight:600;">${act.count.toLocaleString()} 人已跟進</span>
+                </div>
+                <div style="width:100%; background:rgba(0,0,0,0.05); height:8px; border-radius:4px; overflow:hidden;">
+                  <div style="width:${pct}%; background:var(--clr-primary); height:100%; border-radius:4px; transition: width 0.4s ease;"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+        } else {
+          // 渲染跨國大對決（激發為國爭光的環保熱血！）
+          countryIcon.textContent = '🏆';
+          countryTitle.textContent = '全球環保總戰力榜';
+          rankTitle.textContent = '📊 全球各國環保行動總累積次數';
+          toggleRankBtn.textContent = '← 返回觀看單國詳情';
+          mapHint.textContent = '當前顯示：全球國家跨國競爭';
+
+          const sortedCountries = Object.keys(GLOBAL_MAP_DATA).map(code => {
+            return { code: code, ...GLOBAL_MAP_DATA[code], total: getCountryTotalPoints(code) };
+          }).sort((a, b) => b.total - a.total);
+
+          const maxTotal = sortedCountries[0].total || 1;
+
+          leaderboard.innerHTML = sortedCountries.map((c, idx) => {
+            const pct = (c.total / maxTotal) * 100;
+            let medal = `${idx + 1}.`;
+            if (idx === 0) medal = '🥇';
+            if (idx === 1) medal = '🥈';
+            if (idx === 2) medal = '🥉';
+
+            const isSelected = c.code === activeCode ? 'background: rgba(212,168,67,0.12); padding: 4px; border-radius:4px; border-left: 3px solid #cf7500;' : '';
+
+            return `
+              <div style="margin-bottom: 2px; ${isSelected}">
+                <div style="display:flex; justify-content:space-between; margin-bottom:2px; font-size:0.85rem;">
+                  <span><strong>${medal}</strong> ${c.icon} ${c.name}</span>
+                  <span style="font-weight:600; color:#333;">${c.total.toLocaleString()} 次行動</span>
+                </div>
+                <div style="width:100%; background:rgba(0,0,0,0.05); height:8px; border-radius:4px; overflow:hidden;">
+                  <div style="width:${pct}%; background:${c.code === activeCode ? '#cf7500' : 'var(--clr-muted)'}; height:100%; border-radius:4px; transition: width 0.4s;"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 地圖標記點的選取同步
+      function syncMapActiveState() {
+        mapMarkers.forEach(mk => {
+          if (mk.getAttribute('data-code') === activeCode) {
+            mk.classList.add('active');
+          } else {
+            mk.classList.remove('active');
+          }
+        });
+      }
+
+      // 互動：點擊平面 SVG 地圖圓點
+      mapMarkers.forEach(mk => {
+        mk.addEventListener('click', () => {
+          activeCode = mk.getAttribute('data-code');
+          countrySelect.value = activeCode;
+          currentMode = 'country'; // 點擊地圖時強制解鎖查看該國數據
+          syncMapActiveState();
+          updateRankingsView();
+        });
+      });
+
+      // 互動：變更國家下拉選單
+      countrySelect.addEventListener('change', (e) => {
+        activeCode = e.target.value;
+        currentMode = 'country';
+        syncMapActiveState();
+        updateRankingsView();
+      });
+
+      // 互動：切換單國/全球大排行模式
+      toggleRankBtn.addEventListener('click', () => {
+        currentMode = currentMode === 'country' ? 'global' : 'country';
+        updateRankingsView();
+      });
+
+      // 互動：遞交投票按鈕，模擬即時數據加1
+      submitBtn.addEventListener('click', () => {
+        const selectedAction = actionSelect.value;
+        GLOBAL_MAP_DATA[activeCode].counts[selectedAction]++;
+        
+        // 重新渲染最新排行榜
+        updateRankingsView();
+
+        // 按鈕成功動畫回饋
+        const origText = submitBtn.textContent;
+        submitBtn.textContent = '🎉 回報成功！已為該國注入 1 點綠色動能！';
+        submitBtn.style.background = '#285430'; 
+        submitBtn.disabled = true;
+
+        setTimeout(() => {
+          submitBtn.textContent = origText;
+          submitBtn.style.background = '';
+          submitBtn.disabled = false;
+        }, 1800);
+      });
+
+      // 初始化跑第一次
+      syncMapActiveState();
+      updateRankingsView();
+    }
+
+    // 當頁面載入完成後執行
     buildCarousel();
     renderCards();
+    initPlaneMapCompetition();
   </script>
 </body>
 </html>
