@@ -340,6 +340,7 @@
   </style>
 </head>
 <body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="../js/navbar.js"></script>
 
   <!-- Page hero -->
@@ -417,6 +418,31 @@
       </div>
     </div>
   </div>
+
+  <!-- Globe Section -->
+  <section class="section" style="padding-top:var(--sp-2xl); padding-bottom:var(--sp-2xl);">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom:var(--sp-sm)">🌍 全球環保行動地圖</h2>
+      <p style="color:var(--clr-muted); margin-bottom:var(--sp-xl); font-size:0.95rem">點擊地球上的標記，查看各地可參與的環保活動</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-2xl); align-items:center">
+        <!-- Globe -->
+        <div style="position:relative;">
+          <canvas id="globeCanvas" style="width:100%; border-radius:var(--radius-xl); cursor:grab"></canvas>
+          <p style="font-size:0.78rem; color:var(--clr-muted); text-align:center; margin-top:var(--sp-sm)">拖曳旋轉地球</p>
+        </div>
+        <!-- Event Info -->
+        <div id="globeInfo">
+          <div style="background:var(--clr-surface); border:1px solid var(--clr-border); border-radius:var(--radius-lg); padding:var(--sp-xl);">
+            <div style="font-size:2rem; margin-bottom:var(--sp-md)" id="globeEventIcon">🌱</div>
+            <h3 id="globeEventTitle" style="margin-bottom:var(--sp-sm)">點擊地球上的標記</h3>
+            <p id="globeEventDesc" style="color:var(--clr-muted); font-size:0.9rem; margin-bottom:var(--sp-md)">選擇一個地點，查看當地的環保活動與參與方式。</p>
+            <div id="globeEventTags" style="display:flex; flex-wrap:wrap; gap:var(--sp-sm)"></div>
+            <a id="globeEventLink" href="#" target="_blank" style="display:none; margin-top:var(--sp-lg);" class="btn btn-primary">了解更多 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer style="background:var(--clr-dark);color:rgba(255,255,255,0.6);padding:var(--sp-xl) 0;text-align:center;font-size:0.85rem">
@@ -821,6 +847,254 @@
     // Init
     buildCarousel();
     renderCards();
+
+
+    /* ================================================
+   GLOBE
+   ================================================ */
+const EVENTS = [
+  {
+    name: '台灣淨灘行動',
+    lat: 23.5, lng: 121.0,
+    icon: '🏖️',
+    desc: '每年定期舉辦全台淨灘活動，招募志工清理海岸垃圾，守護海洋生態。',
+    tags: ['淨灘', '海洋保護', '志工'],
+    link: 'https://www.keepoceanclean.org',
+  },
+  {
+    name: '日本循環經濟展',
+    lat: 35.7, lng: 139.7,
+    icon: '♻️',
+    desc: '東京每年舉辦循環經濟博覽會，展示最新永續技術與零廢棄生活方案。',
+    tags: ['循環經濟', '展覽', '永續技術'],
+    link: 'https://www.japan-eco-products.com',
+  },
+  {
+    name: '歐洲無塑挑戰',
+    lat: 48.8, lng: 2.3,
+    icon: '🚫',
+    desc: '法國巴黎發起的無塑生活挑戰，每月一個減塑目標，已吸引超過百萬人參與。',
+    tags: ['減塑', '生活挑戰', '社群行動'],
+    link: 'https://www.plasticfreejuly.org',
+  },
+  {
+    name: '肯亞植樹運動',
+    lat: -1.3, lng: 36.8,
+    icon: '🌳',
+    desc: '奈洛比的綠色地球計畫，招募志工在東非大草原種植本土樹種，對抗沙漠化。',
+    tags: ['植樹', '生態復育', '非洲'],
+    link: 'https://www.greenbeltmovement.org',
+  },
+  {
+    name: '紐約氣候週',
+    lat: 40.7, lng: -74.0,
+    icon: '🌡️',
+    desc: '每年九月聯合國大會期間舉辦，匯聚全球領袖討論氣候行動，開放公民參與。',
+    tags: ['氣候變遷', '國際會議', '公民參與'],
+    link: 'https://www.climateweeknyc.org',
+  },
+  {
+    name: '澳洲珊瑚礁保育',
+    lat: -18.0, lng: 147.0,
+    icon: '🪸',
+    desc: '大堡礁珊瑚保育計畫，提供潛水志工培訓，協助監測並修復受損珊瑚礁。',
+    tags: ['海洋保育', '珊瑚礁', '潛水志工'],
+    link: 'https://www.reef.crc.org.au',
+  },
+  {
+    name: '印度太陽能村落',
+    lat: 20.6, lng: 78.9,
+    icon: '☀️',
+    desc: '孟買附近的農村太陽能計畫，協助偏鄉安裝太陽能板，減少柴火使用與碳排。',
+    tags: ['再生能源', '農村發展', '太陽能'],
+    link: 'https://www.selco-india.com',
+  },
+  {
+    name: '巴西亞馬遜守護',
+    lat: -3.5, lng: -62.0,
+    icon: '🌿',
+    desc: '亞馬遜雨林保育組織，招募生態志工協助監測非法砍伐並記錄生物多樣性。',
+    tags: ['雨林保育', '生物多樣性', '志工'],
+    link: 'https://www.amazonwatch.org',
+  },
+];
+
+(function initGlobe() {
+  const canvas  = document.getElementById('globeCanvas');
+  const W       = canvas.parentElement.offsetWidth;
+  const H       = W;
+  canvas.width  = W;
+  canvas.height = H;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.z = 2.8;
+
+  // Globe
+  const geo      = new THREE.SphereGeometry(1, 64, 64);
+  const loader   = new THREE.TextureLoader();
+  const earthMat = new THREE.MeshPhongMaterial({
+    color: 0x3A6B3A,
+    emissive: 0x112211,
+    shininess: 15,
+  });
+  const earth = new THREE.Mesh(geo, earthMat);
+  scene.add(earth);
+
+  // Load earth texture
+  loader.load(
+    'https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg',
+    tex => { earthMat.map = tex; earthMat.needsUpdate = true; }
+  );
+
+  // Atmosphere glow
+  const atmGeo = new THREE.SphereGeometry(1.02, 64, 64);
+  const atmMat = new THREE.MeshPhongMaterial({
+    color: 0x4488ff,
+    transparent: true,
+    opacity: 0.08,
+    side: THREE.FrontSide,
+  });
+  scene.add(new THREE.Mesh(atmGeo, atmMat));
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+  sun.position.set(5, 3, 5);
+  scene.add(sun);
+
+  // Convert lat/lng to 3D position
+  function latLngToVec3(lat, lng, r = 1.05) {
+    const phi   = (90 - lat) * (Math.PI / 180);
+    const theta = (lng + 180) * (Math.PI / 180);
+    return new THREE.Vector3(
+      -r * Math.sin(phi) * Math.cos(theta),
+       r * Math.cos(phi),
+       r * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+
+  // Markers
+  const markers = [];
+  EVENTS.forEach((ev, i) => {
+    const pos     = latLngToVec3(ev.lat, ev.lng);
+    const markerG = new THREE.SphereGeometry(0.035, 16, 16);
+    const markerM = new THREE.MeshBasicMaterial({ color: 0xD4A843 });
+    const marker  = new THREE.Mesh(markerG, markerM);
+    marker.position.copy(pos);
+    marker.userData = { index: i };
+    scene.add(marker);
+    markers.push(marker);
+
+    // Pulse ring
+    const ringG = new THREE.RingGeometry(0.04, 0.06, 32);
+    const ringM = new THREE.MeshBasicMaterial({ color: 0xD4A843, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+    const ring  = new THREE.Mesh(ringG, ringM);
+    ring.position.copy(pos);
+    ring.lookAt(0, 0, 0);
+    ring.userData = { pulse: true, baseScale: 1, phase: i * 0.5 };
+    scene.add(ring);
+  });
+
+  // Drag rotation
+  let isDragging = false, prevX = 0, prevY = 0;
+  let rotX = 0, rotY = 0, velX = 0, velY = 0;
+
+  canvas.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; canvas.style.cursor = 'grabbing'; });
+  canvas.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; });
+
+  window.addEventListener('mouseup',   () => { isDragging = false; canvas.style.cursor = 'grab'; });
+  window.addEventListener('touchend',  () => { isDragging = false; });
+
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    velY = (e.clientX - prevX) * 0.005;
+    velX = (e.clientY - prevY) * 0.005;
+    rotY += velY; rotX += velX;
+    prevX = e.clientX; prevY = e.clientY;
+  });
+
+  canvas.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    velY = (e.touches[0].clientX - prevX) * 0.005;
+    velX = (e.touches[0].clientY - prevY) * 0.005;
+    rotY += velY; rotX += velX;
+    prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+  });
+
+  // Click marker
+  const raycaster = new THREE.Raycaster();
+  const mouse     = new THREE.Vector2();
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+    mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(markers);
+    if (hits.length > 0) {
+      const ev = EVENTS[hits[0].object.userData.index];
+      document.getElementById('globeEventIcon').textContent  = ev.icon;
+      document.getElementById('globeEventTitle').textContent = ev.name;
+      document.getElementById('globeEventDesc').textContent  = ev.desc;
+      document.getElementById('globeEventTags').innerHTML    = ev.tags.map(t =>
+        `<span class="badge badge-green">${t}</span>`
+      ).join('');
+      const link = document.getElementById('globeEventLink');
+      link.href  = ev.link;
+      link.style.display = 'inline-flex';
+
+      // Rotate to face marker
+      const target = hits[0].object.position.clone().normalize();
+      const targetRotY = Math.atan2(target.x, target.z);
+      rotY = targetRotY;
+    }
+  });
+
+  // Animate
+  let clock = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    clock += 0.016;
+
+    if (!isDragging) {
+      velX *= 0.95; velY *= 0.95;
+      rotY += velY + 0.002;
+      rotX += velX;
+    }
+    rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
+
+    earth.rotation.y = rotY;
+    earth.rotation.x = rotX;
+
+    // Sync markers with earth rotation
+    markers.forEach(m => {
+      m.rotation.copy(earth.rotation);
+    });
+
+    scene.children.forEach(obj => {
+      if (obj.userData && obj.userData.pulse) {
+        obj.rotation.copy(earth.rotation);
+        const s = 1 + 0.3 * Math.sin(clock * 2 + obj.userData.phase);
+        obj.scale.setScalar(s);
+        obj.material.opacity = 0.3 + 0.3 * Math.sin(clock * 2 + obj.userData.phase);
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    const w = canvas.parentElement.offsetWidth;
+    canvas.width = w; canvas.height = w;
+    renderer.setSize(w, w);
+  });
+})();
   </script>
 </body>
 </html>
