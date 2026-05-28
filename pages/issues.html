@@ -991,43 +991,41 @@ const EVENTS = [
     );
   }
 
-  // Markers
+ // Markers
   const markers = [];
   const rings = [];
   
   EVENTS.forEach((ev, i) => {
     const pos     = latLngToVec3(ev.lat, ev.lng);
-
-    // 定位點
+    
+    // 定位點：改用 AdditiveBlending 疊加發光
     const markerG = new THREE.SphereGeometry(0.025, 16, 16);
-    const markerM = new THREE.MeshPhongMaterial({ 
-      color: 0xD4A843,          // 標記基本顏色（金黃色）
-      emissive: 0xFFD700,       // 💡 自發光顏色（亮金色）
-      emissiveIntensity: 2.5,   // 💡 發光強度（數字越大越耀眼，可根據畫面微調）
-      shininess: 30             // 高光反光度
+    const markerM = new THREE.MeshBasicMaterial({ 
+      color: 0xFFF066,               // 更亮、帶點白光的黃色
+      transparent: true,
+      blending: THREE.AdditiveBlending // 💡 關鍵：發光疊加模式，會讓顏色與背景融合並亮起來
     });
     const marker  = new THREE.Mesh(markerG, markerM);
     marker.position.copy(pos);
-    marker.userData = { index: i };
-    globeGroup.add(marker); // 加進群組
+    // 儲存初始大小，方便後面做呼吸燈動畫
+    marker.userData = { index: i, baseScale: 1, phase: i * 0.5 }; 
+    globeGroup.add(marker);
     markers.push(marker);
 
-    
-  // 漣漪圈
+    // 漣漪圈：同樣使用發光疊加
     const ringG = new THREE.RingGeometry(0.03, 0.05, 32);
-    const ringM = new THREE.MeshPhongMaterial({ 
-      color: 0xD4A843, 
-      emissive: 0xFFCC00,       // 💡 讓光圈也帶有自發光
-      emissiveIntensity: 1.8,   // 💡 發光強度
+    const ringM = new THREE.MeshBasicMaterial({ 
+      color: 0xFFD700, 
       transparent: true, 
       opacity: 0.8, 
+      blending: THREE.AdditiveBlending, // 💡 讓外圍圈圈也有霓虹感
       side: THREE.DoubleSide 
     });
     const ring  = new THREE.Mesh(ringG, ringM);
     ring.position.copy(pos);
     ring.lookAt(0, 0, 0);
     ring.userData = { pulse: true, phase: i * 0.5 };
-    globeGroup.add(ring); // 加進群組
+    globeGroup.add(ring);
     rings.push(ring);
   });
 
@@ -1105,10 +1103,17 @@ const EVENTS = [
     globeGroup.rotation.x = rotX;
 
     // 漣漪特效動畫
+   markers.forEach(marker => {
+      // 隨時間在 0.8 到 1.3 倍之間快速縮放，營造閃爍微光感
+      const glowScale = 1.0 + 0.3 * Math.sin(clock * 4 + marker.userData.phase);
+      marker.scale.setScalar(glowScale);
+    });
+
+    // 2. 漣漪外圈擴散動畫
     rings.forEach(ring => {
-      const s = 1 + 0.4 * Math.sin(clock * 2.5 + ring.userData.phase);
+      const s = 1 + 0.5 * Math.sin(clock * 2.5 + ring.userData.phase);
       ring.scale.setScalar(s);
-      ring.material.opacity = 0.6 - (s - 1) * 1.5;
+      ring.material.opacity = 0.8 - (s - 1) * 1.6;
     });
 
     renderer.render(scene, camera);
