@@ -337,6 +337,166 @@
     @media (max-width: 768px) {
       .hero-grid { grid-template-columns: 1fr !important; }
     }
+
+    /* =========================================================
+GLOBAL ACTION MAP
+========================================================= */
+
+.global-action-section {
+  margin-top: var(--sp-2xl);
+  background: rgba(255,255,255,0.92);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-2xl);
+  box-shadow: var(--shadow-md);
+}
+
+.global-title {
+  text-align: center;
+  margin-bottom: var(--sp-2xl);
+}
+
+.global-title h2 {
+  font-size: 2.2rem;
+  margin-bottom: var(--sp-sm);
+}
+
+.global-title p {
+  color: var(--clr-muted);
+}
+
+.action-map-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: var(--sp-xl);
+}
+
+.world-svg {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 2px solid var(--clr-border);
+  background: #dff2f1;
+}
+
+.country {
+  fill: #A8D5BA;
+  stroke: white;
+  stroke-width: 3;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.country:hover {
+  transform: scale(1.02);
+  opacity: 0.9;
+}
+
+.map-legend {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.legend {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  margin-right: 5px;
+}
+
+.legend.low {
+  background: #cfe8d5;
+}
+
+.legend.medium {
+  background: #78b88c;
+}
+
+.legend.high {
+  background: #2e7d32;
+}
+
+.action-panel {
+  background: #F7F5EF;
+  padding: var(--sp-xl);
+  border-radius: var(--radius-xl);
+}
+
+.action-select {
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-border);
+  margin-bottom: var(--sp-md);
+  font-size: 0.95rem;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--clr-primary);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.score-board {
+  margin-top: var(--sp-xl);
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.score-country {
+  font-weight: 600;
+}
+
+.score-points {
+  color: var(--clr-primary);
+  font-weight: 700;
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.cat-btn {
+  border: none;
+  background: #E5E2D8;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.8rem;
+}
+
+.cat-btn.active {
+  background: var(--clr-primary);
+  color: white;
+}
+
+@media (max-width: 900px) {
+  .action-map-layout {
+    grid-template-columns: 1fr;
+  }
+}
   </style>
 </head>
 <body>
@@ -385,6 +545,134 @@
       </p>
 
       <div class="issues-grid" id="issuesGrid"></div>
+      <section class="global-action-section">
+
+  <div class="global-title">
+    <h2>🌍 全球環保行動地圖</h2>
+    <p>
+      選擇你的國家並完成環保行動，
+      與全世界一起挑戰 SDG12！
+    </p>
+  </div>
+
+  <div class="action-map-layout">
+
+    <!-- LEFT : MAP -->
+    <div class="map-side">
+
+      <!-- SVG WORLD MAP -->
+      <svg
+        id="worldMap"
+        viewBox="0 0 1000 500"
+        class="world-svg"
+      >
+
+        <!-- Ocean -->
+        <rect width="1000" height="500" fill="#dff2f1"/>
+
+        <!-- Countries -->
+        <g id="countries">
+
+          <!-- USA -->
+          <path
+            id="USA"
+            class="country"
+            d="M140 180 L250 180 L280 220 L240 260 L150 240 Z"
+          />
+
+          <!-- Taiwan -->
+          <path
+            id="Taiwan"
+            class="country"
+            d="M790 240 L800 240 L805 265 L795 280 L785 260 Z"
+          />
+
+          <!-- Japan -->
+          <path
+            id="Japan"
+            class="country"
+            d="M850 200 L865 220 L855 250 L840 230 Z"
+          />
+
+          <!-- Korea -->
+          <path
+            id="Korea"
+            class="country"
+            d="M815 200 L825 220 L818 240 L808 225 Z"
+          />
+
+          <!-- Germany -->
+          <path
+            id="Germany"
+            class="country"
+            d="M500 150 L530 150 L535 190 L505 190 Z"
+          />
+
+        </g>
+
+      </svg>
+
+      <div class="map-legend">
+        <div><span class="legend low"></span> 低參與</div>
+        <div><span class="legend medium"></span> 中參與</div>
+        <div><span class="legend high"></span> 高參與</div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="action-panel">
+
+      <h3>參與環保行動</h3>
+
+      <select id="countrySelect" class="action-select">
+        <option value="Taiwan">台灣</option>
+        <option value="Japan">日本</option>
+        <option value="USA">美國</option>
+        <option value="Korea">韓國</option>
+        <option value="Germany">德國</option>
+      </select>
+
+      <select id="actionSelect" class="action-select">
+        <option value="consumption">🛒 減少過度消費</option>
+        <option value="plastic">🧴 減少塑膠污染</option>
+        <option value="food">🍱 減少食物浪費</option>
+        <option value="fashion">👕 支持慢時尚</option>
+        <option value="ewaste">💻 電子垃圾回收</option>
+        <option value="energy">⚡ 節約能源</option>
+      </select>
+
+      <button class="action-btn" onclick="submitAction()">
+        我完成這個環保行動！
+      </button>
+
+      <!-- OVERALL -->
+      <div class="score-board">
+        <h3>🏆 全球總排行榜</h3>
+        <div id="globalBoard"></div>
+      </div>
+
+      <!-- CATEGORY -->
+      <div class="score-board">
+        <h3>🌱 六大行動排行榜</h3>
+
+        <div class="category-tabs">
+          <button class="cat-btn active" data-cat="consumption">過度消費</button>
+          <button class="cat-btn" data-cat="plastic">塑膠</button>
+          <button class="cat-btn" data-cat="food">食物</button>
+          <button class="cat-btn" data-cat="fashion">快時尚</button>
+          <button class="cat-btn" data-cat="ewaste">電子垃圾</button>
+          <button class="cat-btn" data-cat="energy">能源</button>
+        </div>
+
+        <div id="categoryBoard"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
     </div>
   </section>
 
@@ -821,6 +1109,217 @@
     // Init
     buildCarousel();
     renderCards();
+
+    /* =========================================================
+GLOBAL ECO ACTION SYSTEM
+========================================================= */
+
+const ecoData = {
+  Taiwan: {
+    total: 240,
+    consumption: 50,
+    plastic: 65,
+    food: 30,
+    fashion: 25,
+    ewaste: 40,
+    energy: 30
+  },
+
+  Japan: {
+    total: 210,
+    consumption: 35,
+    plastic: 70,
+    food: 40,
+    fashion: 20,
+    ewaste: 25,
+    energy: 20
+  },
+
+  USA: {
+    total: 180,
+    consumption: 60,
+    plastic: 20,
+    food: 35,
+    fashion: 30,
+    ewaste: 15,
+    energy: 20
+  },
+
+  Korea: {
+    total: 170,
+    consumption: 25,
+    plastic: 35,
+    food: 30,
+    fashion: 55,
+    ewaste: 10,
+    energy: 15
+  },
+
+  Germany: {
+    total: 230,
+    consumption: 30,
+    plastic: 45,
+    food: 25,
+    fashion: 15,
+    ewaste: 35,
+    energy: 80
+  }
+};
+
+/* =========================================================
+GLOBAL RANKING
+========================================================= */
+
+function renderGlobalBoard() {
+
+  const board = document.getElementById('globalBoard');
+
+  const sorted = Object.entries(ecoData)
+    .sort((a, b) => b[1].total - a[1].total);
+
+  board.innerHTML = sorted.map(([country, data], index) => `
+    <div class="score-item">
+      <div class="score-country">
+        #${index + 1} ${country}
+      </div>
+
+      <div class="score-points">
+        ${data.total} pts
+      </div>
+    </div>
+  `).join('');
+
+}
+
+/* =========================================================
+CATEGORY RANKING
+========================================================= */
+
+let currentCategory = 'consumption';
+
+function renderCategoryBoard(category) {
+
+  const board = document.getElementById('categoryBoard');
+
+  const sorted = Object.entries(ecoData)
+    .sort((a, b) => b[1][category] - a[1][category]);
+
+  board.innerHTML = sorted.map(([country, data], index) => `
+    <div class="score-item">
+      <div class="score-country">
+        #${index + 1} ${country}
+      </div>
+
+      <div class="score-points">
+        ${data[category]} pts
+      </div>
+    </div>
+  `).join('');
+
+}
+
+/* =========================================================
+MAP COLOR
+========================================================= */
+
+function updateMapColors() {
+
+  const totals = Object.values(ecoData).map(d => d.total);
+
+  const max = Math.max(...totals);
+
+  Object.entries(ecoData).forEach(([country, data]) => {
+
+    const el = document.getElementById(country);
+
+    if (!el) return;
+
+    const ratio = data.total / max;
+
+    let color = '#CFE8D5';
+
+    if (ratio > 0.8) {
+      color = '#2E7D32';
+    }
+    else if (ratio > 0.5) {
+      color = '#78B88C';
+    }
+
+    el.style.fill = color;
+  });
+
+}
+
+/* =========================================================
+SUBMIT ACTION
+========================================================= */
+
+function submitAction() {
+
+  const country = document.getElementById('countrySelect').value;
+
+  const action = document.getElementById('actionSelect').value;
+
+  ecoData[country].total += 1;
+
+  ecoData[country][action] += 1;
+
+  renderGlobalBoard();
+
+  renderCategoryBoard(currentCategory);
+
+  updateMapColors();
+
+  alert(`🌱 ${country} 完成了一次環保行動！`);
+
+}
+
+/* =========================================================
+CATEGORY BUTTONS
+========================================================= */
+
+document.querySelectorAll('.cat-btn').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    document.querySelectorAll('.cat-btn')
+      .forEach(b => b.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    currentCategory = btn.dataset.cat;
+
+    renderCategoryBoard(currentCategory);
+
+  });
+
+});
+
+/* =========================================================
+COUNTRY CLICK
+========================================================= */
+
+document.querySelectorAll('.country').forEach(country => {
+
+  country.addEventListener('click', () => {
+
+    const id = country.id;
+
+    document.getElementById('countrySelect').value = id;
+
+  });
+
+});
+
+/* =========================================================
+INIT
+========================================================= */
+
+renderGlobalBoard();
+
+renderCategoryBoard(currentCategory);
+
+updateMapColors();
   </script>
 </body>
 </html>
