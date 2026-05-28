@@ -997,19 +997,32 @@ const EVENTS = [
   
   EVENTS.forEach((ev, i) => {
     const pos     = latLngToVec3(ev.lat, ev.lng);
-    
+
     // 定位點
     const markerG = new THREE.SphereGeometry(0.025, 16, 16);
-    const markerM = new THREE.MeshBasicMaterial({ color: 0xD4A843 });
+    const markerM = new THREE.MeshPhongMaterial({ 
+      color: 0xD4A843,          // 標記基本顏色（金黃色）
+      emissive: 0xFFD700,       // 💡 自發光顏色（亮金色）
+      emissiveIntensity: 2.5,   // 💡 發光強度（數字越大越耀眼，可根據畫面微調）
+      shininess: 30             // 高光反光度
+    });
     const marker  = new THREE.Mesh(markerG, markerM);
     marker.position.copy(pos);
     marker.userData = { index: i };
     globeGroup.add(marker); // 加進群組
     markers.push(marker);
 
-    // 漣漪圈
+    
+  // 漣漪圈
     const ringG = new THREE.RingGeometry(0.03, 0.05, 32);
-    const ringM = new THREE.MeshBasicMaterial({ color: 0xD4A843, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+    const ringM = new THREE.MeshPhongMaterial({ 
+      color: 0xD4A843, 
+      emissive: 0xFFCC00,       // 💡 讓光圈也帶有自發光
+      emissiveIntensity: 1.8,   // 💡 發光強度
+      transparent: true, 
+      opacity: 0.8, 
+      side: THREE.DoubleSide 
+    });
     const ring  = new THREE.Mesh(ringG, ringM);
     ring.position.copy(pos);
     ring.lookAt(0, 0, 0);
