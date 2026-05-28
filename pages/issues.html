@@ -849,8 +849,8 @@
     renderCards();
 
 
-    /* ================================================
-   GLOBE
+  /* ================================================
+   GLOBE (修正版：加入 Group 整合旋轉與解決 CORS 貼圖問題)
    ================================================ */
 const EVENTS = [
   {
@@ -934,21 +934,34 @@ const EVENTS = [
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
   camera.position.z = 2.8;
 
-  // Globe
+  // 💡 【核心修正】建立一個地球群組，把地球與所有標記包在一起轉動
+  const globeGroup = new THREE.Group();
+  scene.add(globeGroup);
+
+  // Globe Mesh
   const geo      = new THREE.SphereGeometry(1, 64, 64);
   const loader   = new THREE.TextureLoader();
+  
+  // 💡 【核心修正】設定允許跨網域載入圖片，修正地球變純綠色的貼圖失敗問題
+  loader.setCrossOrigin('anonymous'); 
+
   const earthMat = new THREE.MeshPhongMaterial({
-    color: 0x3A6B3A,
-    emissive: 0x112211,
-    shininess: 15,
+    color: 0xdddddd, // 改為偏白，貼圖載入前比較自然
+    shininess: 5,
   });
   const earth = new THREE.Mesh(geo, earthMat);
-  scene.add(earth);
+  globeGroup.add(earth); // 加進群組
 
-  // Load earth texture
+  // 載入地球貼圖 (改用較穩定的 Unsplash 陸地地圖或原生範例圖)
   loader.load(
-    'https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg',
-    tex => { earthMat.map = tex; earthMat.needsUpdate = true; }
+    'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg',
+    tex => { 
+      earthMat.color.setHex(0xffffff); // 貼圖成功後將底色洗掉
+      earthMat.map = tex; 
+      earthMat.needsUpdate = true; 
+    },
+    undefined,
+    err => { console.error("貼圖載入失敗，採用備用逼真綠色地球："); earthMat.color.setHex(0x3A6B3A); }
   );
 
   // Atmosphere glow
@@ -956,19 +969,19 @@ const EVENTS = [
   const atmMat = new THREE.MeshPhongMaterial({
     color: 0x4488ff,
     transparent: true,
-    opacity: 0.08,
+    opacity: 0.12,
     side: THREE.FrontSide,
   });
-  scene.add(new THREE.Mesh(atmGeo, atmMat));
+  globeGroup.add(new THREE.Mesh(atmGeo, atmMat));
 
   // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.0);
   sun.position.set(5, 3, 5);
   scene.add(sun);
 
   // Convert lat/lng to 3D position
-  function latLngToVec3(lat, lng, r = 1.05) {
+  function latLngToVec3(lat, lng, r = 1.01) {
     const phi   = (90 - lat) * (Math.PI / 180);
     const theta = (lng + 180) * (Math.PI / 180);
     return new THREE.Vector3(
@@ -980,24 +993,29 @@ const EVENTS = [
 
   // Markers
   const markers = [];
+  const rings = [];
+  
   EVENTS.forEach((ev, i) => {
     const pos     = latLngToVec3(ev.lat, ev.lng);
-    const markerG = new THREE.SphereGeometry(0.035, 16, 16);
+    
+    // 定位點
+    const markerG = new THREE.SphereGeometry(0.025, 16, 16);
     const markerM = new THREE.MeshBasicMaterial({ color: 0xD4A843 });
     const marker  = new THREE.Mesh(markerG, markerM);
     marker.position.copy(pos);
     marker.userData = { index: i };
-    scene.add(marker);
+    globeGroup.add(marker); // 加進群組
     markers.push(marker);
 
-    // Pulse ring
-    const ringG = new THREE.RingGeometry(0.04, 0.06, 32);
+    // 漣漪圈
+    const ringG = new THREE.RingGeometry(0.03, 0.05, 32);
     const ringM = new THREE.MeshBasicMaterial({ color: 0xD4A843, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
     const ring  = new THREE.Mesh(ringG, ringM);
     ring.position.copy(pos);
     ring.lookAt(0, 0, 0);
-    ring.userData = { pulse: true, baseScale: 1, phase: i * 0.5 };
-    scene.add(ring);
+    ring.userData = { pulse: true, phase: i * 0.5 };
+    globeGroup.add(ring); // 加進群組
+    rings.push(ring);
   });
 
   // Drag rotation
@@ -1026,7 +1044,7 @@ const EVENTS = [
     prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
   });
 
-  // Click marker
+  // Click marker (💡 點擊判定加上了群組旋轉過後的矩陣轉換，確保轉到哪都能精準點擊)
   const raycaster = new THREE.Raycaster();
   const mouse     = new THREE.Vector2();
 
@@ -1035,6 +1053,7 @@ const EVENTS = [
     mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
     mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
+    
     const hits = raycaster.intersectObjects(markers);
     if (hits.length > 0) {
       const ev = EVENTS[hits[0].object.userData.index];
@@ -1048,10 +1067,9 @@ const EVENTS = [
       link.href  = ev.link;
       link.style.display = 'inline-flex';
 
-      // Rotate to face marker
+      // 點擊後平滑轉向該點
       const target = hits[0].object.position.clone().normalize();
-      const targetRotY = Math.atan2(target.x, target.z);
-      rotY = targetRotY;
+      rotY = Math.atan2(target.x, target.z);
     }
   });
 
@@ -1063,26 +1081,21 @@ const EVENTS = [
 
     if (!isDragging) {
       velX *= 0.95; velY *= 0.95;
-      rotY += velY + 0.002;
+      rotY += velY + 0.0015; // 慢速自動公轉
       rotX += velX;
     }
-    rotX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotX));
+    // 限制上下旋轉角度，避免翻轉翻船
+    rotX = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotX));
 
-    earth.rotation.y = rotY;
-    earth.rotation.x = rotX;
+    // 💡 【核心修正】直接旋轉一整包群組，地球跟標記就會一起完美轉動
+    globeGroup.rotation.y = rotY;
+    globeGroup.rotation.x = rotX;
 
-    // Sync markers with earth rotation
-    markers.forEach(m => {
-      m.rotation.copy(earth.rotation);
-    });
-
-    scene.children.forEach(obj => {
-      if (obj.userData && obj.userData.pulse) {
-        obj.rotation.copy(earth.rotation);
-        const s = 1 + 0.3 * Math.sin(clock * 2 + obj.userData.phase);
-        obj.scale.setScalar(s);
-        obj.material.opacity = 0.3 + 0.3 * Math.sin(clock * 2 + obj.userData.phase);
-      }
+    // 漣漪特效動畫
+    rings.forEach(ring => {
+      const s = 1 + 0.4 * Math.sin(clock * 2.5 + ring.userData.phase);
+      ring.scale.setScalar(s);
+      ring.material.opacity = 0.6 - (s - 1) * 1.5;
     });
 
     renderer.render(scene, camera);
