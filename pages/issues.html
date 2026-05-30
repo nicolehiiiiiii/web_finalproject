@@ -762,9 +762,15 @@ buildDropdown();
       });
 
       window._ew2={
-        setAct:id=>{curAct=id;renderAll();},
-        toggleAct:id=>{selActs.has(id)?selActs.delete(id):selActs.add(id);renderJoin();}
-      };
+  setAct:id=>{
+    curAct=id;
+    // 同步選取下方對應的行動
+    selActs.add(id);
+    renderAll();
+    renderJoin();
+  },
+  toggleAct:id=>{selActs.has(id)?selActs.delete(id):selActs.add(id);renderJoin();}
+};
 
       renderJoin();
       d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(t=>{
