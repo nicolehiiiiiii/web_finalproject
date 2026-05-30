@@ -729,11 +729,11 @@
       }
 
       ctyInput.addEventListener('click',()=>{
-        ctyInput.removeAttribute('readonly');
-        ctyInput.select();
-        buildDropdown(ctyInput.value==='搜尋國家...'?'':ctyInput.value);
-        ctyDrop.classList.add('open');
-      });
+  ctyInput.removeAttribute('readonly');
+  ctyInput.select();
+  buildDropdown('');
+  ctyDrop.classList.add('open');
+});
 
       ctyInput.addEventListener('input',()=>{
         buildDropdown(ctyInput.value);
