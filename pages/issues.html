@@ -360,7 +360,7 @@
       <!-- 左：標題 -->
       <div>
         
-        <h1>從了解開始改變<br/>六大環境危機<br/><i>你認識幾個？<i></h1>
+        <h1>六大環境問題<br/>你了解幾個？</h1>
       </div>
       <!-- 右：影片輪播 -->
       <div style="align-self:flex-start; margin-top:0;">
@@ -489,7 +489,7 @@
             </div>
             <label style="font-size:0.82rem;color:var(--clr-muted);display:block;margin-bottom:var(--sp-sm)">選擇你正在進行的行動（可複選）</label>
             <div id="ew-ja" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:var(--sp-md)"></div>
-            <button id="ew-sub" class="btn btn-primary" style="width:100%;justify-content:center">我願意加入行動</button>
+            <button id="ew-sub" class="btn btn-primary" style="width:100%;justify-content:center">登記我的行動</button>
             <p id="ew-toast" style="font-size:0.82rem;color:var(--clr-primary);text-align:center;margin-top:var(--sp-sm);min-height:20px"></p>
           </div>
         </div>
@@ -554,20 +554,7 @@
       /* ── 監聽資料庫，有變動就自動更新畫面 ── */
       db.ref('ecoActions').on('value', snapshot=>{
         seedIfEmpty(snapshot);
-        if(snapshot.exists()){
-          const raw = snapshot.val();
-          // 確保每個值都是純數字
-          data = {};
-          Object.entries(countries || {}).forEach(([cty, val]) => {
-            // 遞迴加總，不管巢狀幾層都能處理
-            function deepSum(x) {
-              if (typeof x === 'number') return x;
-              if (typeof x === 'object' && x !== null) return Object.values(x).reduce((a,b) => a + deepSum(b), 0);
-              return Number(x) || 0;
-            }
-            data[act][cty] = deepSum(val);
-        });
-        }
+        if(snapshot.exists()) data = snapshot.val();
         renderAll();
       });
 
@@ -593,7 +580,7 @@
 
       function renderStats(){
         const d=data[curAct]||{};
-        const tot = Object.values(d).reduce((s,v) => s + (Number(v)||0), 0);
+        const tot=Object.values(d).reduce((s,v)=>s+v,0);
         document.getElementById('ew-tot').textContent=tot;
         document.getElementById('ew-nat').textContent=Object.keys(d).length;
         document.getElementById('ew-lead').textContent=Object.entries(d).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
