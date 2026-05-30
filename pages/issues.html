@@ -762,13 +762,14 @@ buildDropdown();
       });
 
       window._ew2={
-  setAct:id=>{
-    curAct=id;
-    // 同步選取下方對應的行動
-    selActs.add(id);
-    renderAll();
-    renderJoin();
-  },
+ setAct:id=>{
+  curAct=id;
+  // 切換類別時，清空並只選取該類別
+  selActs.clear();
+  selActs.add(id);
+  renderAll();
+  renderJoin();
+},
   toggleAct:id=>{selActs.has(id)?selActs.delete(id):selActs.add(id);renderJoin();}
 };
 
