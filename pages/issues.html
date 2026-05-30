@@ -666,14 +666,26 @@
           })
           .on('mouseleave',()=>{tt.style.display='none';})
           .on('click',(event,f)=>{
-            const n=ISO_R[String(f.id)];
-            if(!n)return;
-            selCty=n;
-            tt.style.display='none';
-            document.getElementById('ew-cty').value=n;
-            const tag=document.getElementById('ew-seltag');
-            tag.style.display='flex'; tag.textContent='📍 '+n;
-            renderAll();
+  const n=ISO_R[String(f.id)];
+  if(!n)return;
+  tt.style.display='none';
+
+  // 再點一次同一國家 → 取消選擇
+  if(selCty===n){
+    selCty=null;
+    document.getElementById('ew-cty').value='';
+    document.getElementById('ew-cty-input').value='';
+    const tag=document.getElementById('ew-seltag');
+    tag.style.display='none'; tag.textContent='';
+  } else {
+    selCty=n;
+    document.getElementById('ew-cty').value=n;
+    document.getElementById('ew-cty-input').value=n;
+    const tag=document.getElementById('ew-seltag');
+    tag.style.display='flex'; tag.textContent='📍 '+n;
+  }
+  renderAll();
+});
           });
       }
 
