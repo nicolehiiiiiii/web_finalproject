@@ -427,13 +427,14 @@
       選擇行動類別，點擊地圖國家查看人數，並登記加入競賽！
     </p>
 
-    <!-- Action pills -->
     <div id="ew-pills" style="display:flex;flex-wrap:wrap;gap:var(--sp-sm);margin-bottom:var(--sp-lg)"></div>
 
-    <!-- Map -->
-    <div id="ew-map" style="width:100%;border-radius:var(--radius-lg);border:1px solid var(--clr-border);background:#EAF3E6;overflow:hidden;cursor:pointer;position:relative"></div>
+    <!-- tooltip 固定放這裡，不隨 renderMap 重建 -->
+    <div style="position:relative">
+      <div id="ew-map" style="width:100%;border-radius:var(--radius-lg);border:1px solid var(--clr-border);background:#EAF3E6;overflow:hidden;cursor:pointer"></div>
+      <div id="ew-tt" style="pointer-events:none;padding:5px 10px;background:#fff;border:1px solid #D6D0C0;border-radius:8px;font-size:12px;color:#3D3D2E;white-space:nowrap;position:absolute;display:none;z-index:10"></div>
+    </div>
 
-    <!-- Legend -->
     <div style="display:flex;flex-wrap:wrap;gap:var(--sp-md);margin-top:var(--sp-sm);font-size:0.78rem;color:var(--clr-muted)">
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C0DD97;margin-right:4px;vertical-align:middle"></span>1–20 人</span>
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#97C459;margin-right:4px;vertical-align:middle"></span>21–60 人</span>
@@ -443,7 +444,6 @@
       <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FFD700;border:1.5px solid #B8860B;margin-right:4px;vertical-align:middle"></span>已選取</span>
     </div>
 
-    <!-- Stats -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin:var(--sp-lg) 0">
       <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);padding:var(--sp-md);text-align:center">
         <div id="ew-tot" style="font-family:var(--ff-display);font-size:2rem;font-weight:900;color:var(--clr-primary)">0</div>
@@ -459,16 +459,11 @@
       </div>
     </div>
 
-    <!-- Rank + Join side by side -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-xl)">
-
-      <!-- Rank -->
       <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:var(--sp-xl)">
         <h3 style="font-size:1rem;margin-bottom:var(--sp-md)">🏆 國家排行榜</h3>
         <div id="ew-rank"></div>
       </div>
-
-      <!-- Join -->
       <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:var(--sp-xl)">
         <h3 style="font-size:1rem;margin-bottom:var(--sp-md)">📍 加入行動</h3>
         <div id="ew-seltag" style="display:none;align-items:center;gap:6px;margin-bottom:8px;padding:4px 12px;background:#DFF0DF;border-radius:var(--radius-xl);color:var(--clr-primary);font-size:0.82rem;font-weight:600;width:fit-content"></div>
@@ -479,7 +474,6 @@
         <button id="ew-sub" class="btn btn-primary" style="width:100%;justify-content:center">登記我的行動</button>
         <p id="ew-toast" style="font-size:0.82rem;color:var(--clr-primary);text-align:center;margin-top:var(--sp-sm);min-height:20px"></p>
       </div>
-
     </div>
   </div>
 </section>
@@ -523,6 +517,9 @@
   }
 
   let data=seed(), curAct='consumption', selActs=new Set(['consumption']), selCty=null, topo=null, svgNode=null;
+  // tooltip 只抓一次，永遠不重建
+  const tt=document.getElementById('ew-tt');
+  const mapWrap=document.getElementById('ew-map');
 
   function ecoClr(v){
     if(!v)return'#D6D0C0';
@@ -557,7 +554,7 @@
     const sorted=Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,9);
     const max=sorted[0]?.[1]||1;
     document.getElementById('ew-rank').innerHTML=sorted.map(([c,v],i)=>`
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.83rem${c===selCty?';color:var(--clr-primary)':''}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.83rem">
         <span style="width:16px;text-align:right;color:var(--clr-muted);font-size:0.75rem">${i+1}</span>
         <span style="flex:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${c===selCty?'font-weight:600;color:var(--clr-primary)':''}">${c===selCty?'→ ':''}${c}</span>
         <div style="flex:3;height:5px;background:var(--clr-border);border-radius:3px;overflow:hidden">
@@ -570,34 +567,37 @@
 
   function renderMap(){
     if(!topo)return;
-    const wrap=document.getElementById('ew-map');
-    if(svgNode){svgNode.remove();}
-    const W=wrap.clientWidth||500;
+    // 只移除舊的 svg，tooltip 留著不動
+    if(svgNode){svgNode.remove(); svgNode=null;}
+    tt.style.display='none';
+
+    const W=mapWrap.clientWidth||500;
     const H=Math.round(W*0.5);
-    const svg=d3.select(wrap).insert('svg','*')
+    const svg=d3.select(mapWrap).insert('svg','*')
       .attr('viewBox',`0 0 ${W} ${H}`)
       .attr('width','100%').attr('height',H).style('display','block');
     svgNode=svg.node();
-    const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
-    const path=d3.geoPath(proj);
-    const d=data[curAct]||{};
-    const tt=document.createElement('div');
-    tt.style.cssText='pointer-events:none;padding:5px 10px;background:#fff;border:1px solid #D6D0C0;border-radius:8px;font-size:12px;color:#3D3D2E;white-space:nowrap;position:absolute;display:none;z-index:10';
-    wrap.appendChild(tt);
 
-    svg.selectAll('path').data(topojson.feature(topo,topo.objects.countries).features).join('path')
-      .attr('d',path)
+    const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
+    const pathGen=d3.geoPath(proj);
+    const d=data[curAct]||{};
+
+    svg.selectAll('path')
+      .data(topojson.feature(topo,topo.objects.countries).features)
+      .join('path')
+      .attr('d',pathGen)
       .attr('fill',f=>{const n=ISO_R[String(f.id)];return n===selCty?'#FFD700':ecoClr(n?d[n]||0:0);})
       .attr('stroke','#fff').attr('stroke-width',0.4)
       .style('cursor',f=>ISO_R[String(f.id)]?'pointer':'default')
       .on('mousemove',function(event,f){
         const n=ISO_R[String(f.id)];
         if(!n){tt.style.display='none';return;}
-        const r=wrap.getBoundingClientRect();
+        // 座標相對於 mapWrap 的父層（position:relative 那個 div）
+        const r=mapWrap.parentElement.getBoundingClientRect();
         tt.textContent=`${n}：${d[n]||0} 人`;
         tt.style.display='block';
         let lx=event.clientX-r.left+12, ly=event.clientY-r.top+12;
-        if(lx+tt.offsetWidth>W-8)lx=event.clientX-r.left-tt.offsetWidth-8;
+        if(lx+tt.offsetWidth>r.width-8) lx=event.clientX-r.left-tt.offsetWidth-8;
         tt.style.left=lx+'px'; tt.style.top=ly+'px';
       })
       .on('mouseleave',()=>{tt.style.display='none';})
@@ -605,6 +605,7 @@
         const n=ISO_R[String(f.id)];
         if(!n)return;
         selCty=n;
+        tt.style.display='none';
         document.getElementById('ew-cty').value=n;
         const tag=document.getElementById('ew-seltag');
         tag.style.display='flex'; tag.textContent='📍 '+n;
