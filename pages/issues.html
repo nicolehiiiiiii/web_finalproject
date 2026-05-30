@@ -337,6 +337,17 @@
     @media (max-width: 768px) {
       .hero-grid { grid-template-columns: 1fr !important; }
     }
+
+    
+    .cty-wrap{position:relative}
+    .cty-input{width:100%;padding:0.5rem 0.75rem;border:1px solid var(--clr-border);border-radius:var(--radius-sm);background:var(--clr-bg);font-family:var(--ff-body);font-size:0.88rem;box-sizing:border-box;cursor:pointer}
+    .cty-input:focus{outline:none;border-color:var(--clr-primary)}
+    .cty-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);max-height:200px;overflow-y:auto;z-index:100;display:none;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+    .cty-dropdown.open{display:block}
+    .cty-option{padding:8px 12px;font-size:0.88rem;cursor:pointer;color:var(--clr-text)}
+    .cty-option:hover,.cty-option.focused{background:#DFF0DF;color:var(--clr-primary)}
+    .cty-option.selected{font-weight:600;color:var(--clr-primary)}
+    
   </style>
 </head>
 <body>
@@ -471,7 +482,11 @@
             <h3 style="font-size:1rem;margin-bottom:var(--sp-md)">📍 加入行動</h3>
             <div id="ew-seltag" style="display:none;align-items:center;gap:6px;margin-bottom:8px;padding:4px 12px;background:#DFF0DF;border-radius:var(--radius-xl);color:var(--clr-primary);font-size:0.82rem;font-weight:600;width:fit-content"></div>
             <label style="font-size:0.82rem;color:var(--clr-muted);display:block;margin-bottom:4px">選擇你的國家</label>
-            <select id="ew-cty" style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--clr-border);border-radius:var(--radius-sm);background:var(--clr-bg);font-family:var(--ff-body);font-size:0.88rem;margin-bottom:var(--sp-md)"></select>
+            <div class="cty-wrap" style="margin-bottom:var(--sp-md)">
+              <input id="ew-cty-input" class="cty-input" placeholder="搜尋國家..." autocomplete="off" readonly />
+              <div id="ew-cty-dropdown" class="cty-dropdown"></div>
+              <input type="hidden" id="ew-cty" />
+            </div>
             <label style="font-size:0.82rem;color:var(--clr-muted);display:block;margin-bottom:var(--sp-sm)">選擇你正在進行的行動（可複選）</label>
             <div id="ew-ja" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:var(--sp-md)"></div>
             <button id="ew-sub" class="btn btn-primary" style="width:100%;justify-content:center">登記我的行動</button>
@@ -501,16 +516,29 @@
         {id:'ewaste',label:'正確回收電子',icon:'💻'},
         {id:'energy',label:'節能減碳',icon:'⚡'},
       ];
-      const CTYS=['台灣','日本','南韓','中國','美國','英國','德國','法國','澳洲','加拿大',
-        '印度','巴西','墨西哥','荷蘭','瑞典','丹麥','挪威','芬蘭','西班牙','義大利',
-        '新加坡','泰國','印尼','馬來西亞','菲律賓','越南','阿根廷','南非','奈及利亞','埃及'];
+      const CTYS=[
+      '台灣','日本','南韓','中國','香港','澳門','新加坡','泰國','印尼','馬來西亞',
+      '菲律賓','越南','緬甸','柬埔寨','寮國','孟加拉','斯里蘭卡','尼泊爾','巴基斯坦','印度',
+      '美國','加拿大','墨西哥','巴西','阿根廷','智利','哥倫比亞','祕魯','委內瑞拉','厄瓜多',
+      '英國','德國','法國','義大利','西班牙','荷蘭','瑞典','丹麥','挪威','芬蘭',
+      '瑞士','奧地利','比利時','葡萄牙','波蘭','捷克','匈牙利','羅馬尼亞','希臘','土耳其',
+      '俄羅斯','烏克蘭','以色列','沙烏地阿拉伯','阿聯酋','伊朗','埃及','南非','奈及利亞','肯亞',
+      '衣索比亞','摩洛哥','坦尚尼亞','迦納','喀麥隆','澳洲','紐西蘭',
+    ];
       const ISO={
-        '台灣':158,'日本':392,'南韓':410,'中國':156,'美國':840,'英國':826,'德國':276,
-        '法國':250,'澳洲':36,'加拿大':124,'印度':356,'巴西':76,'墨西哥':484,'荷蘭':528,
-        '瑞典':752,'丹麥':208,'挪威':578,'芬蘭':246,'西班牙':724,'義大利':380,
-        '新加坡':702,'泰國':764,'印尼':360,'馬來西亞':458,'菲律賓':608,'越南':704,
-        '阿根廷':32,'南非':710,'奈及利亞':566,'埃及':818
-      };
+      '台灣':158,'日本':392,'南韓':410,'中國':156,'香港':344,'澳門':446,
+      '新加坡':702,'泰國':764,'印尼':360,'馬來西亞':458,'菲律賓':608,'越南':704,
+      '緬甸':104,'柬埔寨':116,'寮國':418,'孟加拉':50,'斯里蘭卡':144,'尼泊爾':524,
+      '巴基斯坦':586,'印度':356,'美國':840,'加拿大':124,'墨西哥':484,'巴西':76,
+      '阿根廷':32,'智利':152,'哥倫比亞':170,'祕魯':604,'委內瑞拉':862,'厄瓜多':218,
+      '英國':826,'德國':276,'法國':250,'義大利':380,'西班牙':724,'荷蘭':528,
+      '瑞典':752,'丹麥':208,'挪威':578,'芬蘭':246,'瑞士':756,'奧地利':40,
+      '比利時':56,'葡萄牙':620,'波蘭':616,'捷克':203,'匈牙利':348,'羅馬尼亞':642,
+      '希臘':300,'土耳其':792,'俄羅斯':643,'烏克蘭':804,'以色列':376,
+      '沙烏地阿拉伯':682,'阿聯酋':784,'伊朗':364,'埃及':818,'南非':710,
+      '奈及利亞':566,'肯亞':404,'衣索比亞':231,'摩洛哥':504,'坦尚尼亞':834,
+      '迦納':288,'喀麥隆':120,'澳洲':36,'紐西蘭':554,
+    };
       const ISO_R={};
       Object.entries(ISO).forEach(([n,v])=>ISO_R[String(v)]=n);
 
@@ -631,14 +659,52 @@
 
       function renderAll(){ renderPills(); renderStats(); renderRank(); renderMap(); }
 
-      const ctyEl=document.getElementById('ew-cty');
-      CTYS.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;ctyEl.appendChild(o);});
-      ctyEl.addEventListener('change',()=>{
-        selCty=ctyEl.value;
-        const tag=document.getElementById('ew-seltag');
-        tag.style.display='flex'; tag.textContent='📍 '+selCty;
+      const ctyEl      = document.getElementById('ew-cty');
+      const ctyInput   = document.getElementById('ew-cty-input');
+      const ctyDrop    = document.getElementById('ew-cty-dropdown');
+
+      function setCty(name){
+        selCty = name;
+        ctyEl.value = name;
+        ctyInput.value = name;
+        ctyDrop.classList.remove('open');
+        const tag = document.getElementById('ew-seltag');
+        tag.style.display = 'flex';
+        tag.textContent = '📍 ' + name;
         renderAll();
+      }
+
+      function buildDropdown(filter=''){
+        const kw = filter.toLowerCase();
+        const matched = CTYS.filter(c => c.includes(kw) || c.toLowerCase().includes(kw));
+        ctyDrop.innerHTML = matched.length
+           ? matched.map(c=>`<div class="cty-option ${c===selCty?'selected':''}" data-name="${c}">${c}</div>`).join('')
+          : '<div style="padding:10px 12px;font-size:0.85rem;color:var(--clr-muted)">找不到符合的國家</div>';
+        ctyDrop.querySelectorAll('.cty-option').forEach(el=>{
+          el.addEventListener('click',()=>setCty(el.dataset.name));
+        });
+      }
+
+      ctyInput.addEventListener('click',()=>{
+        ctyInput.removeAttribute('readonly');
+        ctyInput.select();
+        buildDropdown(ctyInput.value==='搜尋國家...'?'':ctyInput.value);
+        ctyDrop.classList.add('open');
       });
+
+      ctyInput.addEventListener('input',()=>{
+        buildDropdown(ctyInput.value);
+        ctyDrop.classList.add('open');
+      });
+
+      document.addEventListener('click',e=>{
+          if(!e.target.closest('.cty-wrap')){
+            ctyDrop.classList.remove('open');
+          if(!selCty) ctyInput.value='';
+        }
+      });
+
+buildDropdown();
 
       /* ── 登記按鈕：寫入 Firebase（用 transaction 防止同時寫入衝突）── */
       document.getElementById('ew-sub').addEventListener('click',()=>{
