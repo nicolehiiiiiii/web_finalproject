@@ -554,7 +554,17 @@
       /* ── 監聽資料庫，有變動就自動更新畫面 ── */
       db.ref('ecoActions').on('value', snapshot=>{
         seedIfEmpty(snapshot);
-        if(snapshot.exists()) data = snapshot.val();
+        if(snapshot.exists()){
+          const raw = snapshot.val();
+          // 確保每個值都是純數字
+          data = {};
+          Object.entries(raw).forEach(([act, countries]) => {
+            data[act] = {};
+            Object.entries(countries || {}).forEach(([cty, val]) => {
+              data[act][cty] = typeof val === 'object' ? Object.values(val).reduce((a,b)=>a+b,0) : Number(val)||0;
+            });
+          });
+        }
         renderAll();
       });
 
