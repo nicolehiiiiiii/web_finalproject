@@ -558,12 +558,15 @@
           const raw = snapshot.val();
           // 確保每個值都是純數字
           data = {};
-          Object.entries(raw).forEach(([act, countries]) => {
-            data[act] = {};
-            Object.entries(countries || {}).forEach(([cty, val]) => {
-              data[act][cty] = typeof val === 'object' ? Object.values(val).reduce((a,b)=>a+b,0) : Number(val)||0;
-            });
-          });
+          Object.entries(countries || {}).forEach(([cty, val]) => {
+            // 遞迴加總，不管巢狀幾層都能處理
+            function deepSum(x) {
+              if (typeof x === 'number') return x;
+              if (typeof x === 'object' && x !== null) return Object.values(x).reduce((a,b) => a + deepSum(b), 0);
+              return Number(x) || 0;
+            }
+            data[act][cty] = deepSum(val);
+        });
         }
         renderAll();
       });
@@ -590,7 +593,7 @@
 
       function renderStats(){
         const d=data[curAct]||{};
-        const tot=Object.values(d).reduce((s,v)=>s+v,0);
+        const tot = Object.values(d).reduce((s,v) => s + (Number(v)||0), 0);
         document.getElementById('ew-tot').textContent=tot;
         document.getElementById('ew-nat').textContent=Object.keys(d).length;
         document.getElementById('ew-lead').textContent=Object.entries(d).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
