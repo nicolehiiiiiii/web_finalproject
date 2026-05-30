@@ -480,8 +480,16 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
 (function(){
+  /* ── Firebase 設定 ── */
+  const DB_URL = 'https://final-project-for-html-default-rtdb.asia-southeast1.firebasedatabase.app/';
+  firebase.initializeApp({ databaseURL: DB_URL });
+  const db = firebase.database();
+
   const ACTS=[
     {id:'consumption',label:'減少過度消費',icon:'🛒'},
     {id:'plastic',label:'拒絕一次性塑膠',icon:'♻️'},
@@ -503,23 +511,31 @@
   const ISO_R={};
   Object.entries(ISO).forEach(([n,v])=>ISO_R[String(v)]=n);
 
-  function seed(){
-    const d={};
+  /* ── 初始 seed 資料（只在資料庫完全空白時寫入一次）── */
+  function seedIfEmpty(snapshot){
+    if(snapshot.exists()) return;
+    const seed={};
     ACTS.forEach(a=>{
-      d[a.id]={};
+      seed[a.id]={};
       [['台灣',87],['日本',134],['南韓',72],['美國',201],['英國',95],
        ['德國',112],['澳洲',58],['加拿大',66],['瑞典',143],['丹麥',91],
        ['挪威',88],['法國',74],['印度',43],['巴西',31],['荷蘭',55],
        ['新加坡',39],['芬蘭',62],['義大利',47],['西班牙',51]
-      ].forEach(([c,b])=>{d[a.id][c]=Math.max(1,b+Math.round((Math.random()-.5)*20));});
+      ].forEach(([c,b])=>{ seed[a.id][c]=b; });
     });
-    return d;
+    db.ref('ecoActions').set(seed);
   }
 
-  let data=seed(), curAct='consumption', selActs=new Set(['consumption']), selCty=null, topo=null, svgNode=null;
-  // tooltip 只抓一次，永遠不重建
+  let data={}, curAct='consumption', selActs=new Set(['consumption']), selCty=null, topo=null, svgNode=null;
   const tt=document.getElementById('ew-tt');
   const mapWrap=document.getElementById('ew-map');
+
+  /* ── 監聽資料庫，有變動就自動更新畫面 ── */
+  db.ref('ecoActions').on('value', snapshot=>{
+    seedIfEmpty(snapshot);
+    if(snapshot.exists()) data = snapshot.val();
+    renderAll();
+  });
 
   function ecoClr(v){
     if(!v)return'#D6D0C0';
@@ -567,21 +583,17 @@
 
   function renderMap(){
     if(!topo)return;
-    // 只移除舊的 svg，tooltip 留著不動
     if(svgNode){svgNode.remove(); svgNode=null;}
     tt.style.display='none';
-
     const W=mapWrap.clientWidth||500;
     const H=Math.round(W*0.5);
     const svg=d3.select(mapWrap).insert('svg','*')
       .attr('viewBox',`0 0 ${W} ${H}`)
       .attr('width','100%').attr('height',H).style('display','block');
     svgNode=svg.node();
-
     const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
     const pathGen=d3.geoPath(proj);
     const d=data[curAct]||{};
-
     svg.selectAll('path')
       .data(topojson.feature(topo,topo.objects.countries).features)
       .join('path')
@@ -592,7 +604,6 @@
       .on('mousemove',function(event,f){
         const n=ISO_R[String(f.id)];
         if(!n){tt.style.display='none';return;}
-        // 座標相對於 mapWrap 的父層（position:relative 那個 div）
         const r=mapWrap.parentElement.getBoundingClientRect();
         tt.textContent=`${n}：${d[n]||0} 人`;
         tt.style.display='block';
@@ -636,13 +647,16 @@
     renderAll();
   });
 
+  /* ── 登記按鈕：寫入 Firebase（用 transaction 防止同時寫入衝突）── */
   document.getElementById('ew-sub').addEventListener('click',()=>{
     const c=ctyEl.value, t=document.getElementById('ew-toast');
     if(selActs.size===0){t.textContent='請選擇至少一項行動！';return;}
-    selActs.forEach(aid=>{if(!data[aid])data[aid]={};data[aid][c]=(data[aid][c]||0)+1;});
+    selActs.forEach(aid=>{
+      const ref=db.ref(`ecoActions/${aid}/${c}`);
+      ref.transaction(cur=>(cur||0)+1);
+    });
     t.textContent=`✅ ${c} 已登記 ${selActs.size} 項行動！`;
     setTimeout(()=>{t.textContent='';},3000);
-    renderAll();
   });
 
   window._ew2={
@@ -650,8 +664,10 @@
     toggleAct:id=>{selActs.has(id)?selActs.delete(id):selActs.add(id);renderJoin();}
   };
 
-  renderJoin(); renderAll();
-  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(t=>{topo=t;renderMap();});
+  renderJoin();
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(t=>{
+    topo=t; renderMap();
+  });
   window.addEventListener('resize',()=>renderMap());
 })();
 </script>
