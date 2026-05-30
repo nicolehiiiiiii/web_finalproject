@@ -513,17 +513,7 @@
 
   /* ── 初始 seed 資料（只在資料庫完全空白時寫入一次）── */
   function seedIfEmpty(snapshot){
-    if(snapshot.exists()) return;
-    const seed={};
-    ACTS.forEach(a=>{
-      seed[a.id]={};
-      [['台灣',87],['日本',134],['南韓',72],['美國',201],['英國',95],
-       ['德國',112],['澳洲',58],['加拿大',66],['瑞典',143],['丹麥',91],
-       ['挪威',88],['法國',74],['印度',43],['巴西',31],['荷蘭',55],
-       ['新加坡',39],['芬蘭',62],['義大利',47],['西班牙',51]
-      ].forEach(([c,b])=>{ seed[a.id][c]=b; });
-    });
-    db.ref('ecoActions').set(seed);
+    
   }
 
   let data={}, curAct='consumption', selActs=new Set(['consumption']), selCty=null, topo=null, svgNode=null;
