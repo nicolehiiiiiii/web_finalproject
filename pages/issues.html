@@ -418,6 +418,243 @@
     </div>
   </div>
 
+  <!-- ===== ECO ACTION MAP ===== -->
+<section class="section" style="background:rgba(245,242,234,0.92)">
+  <div class="container">
+    <span class="badge badge-green" style="margin-bottom:var(--sp-md)">全球行動地圖</span>
+    <h2 class="section-title">各國環保競賽</h2>
+    <p style="color:var(--clr-muted);margin-bottom:var(--sp-xl)">
+      選擇行動類別，點擊地圖國家查看人數，並登記加入競賽！
+    </p>
+
+    <!-- Action pills -->
+    <div id="ew-pills" style="display:flex;flex-wrap:wrap;gap:var(--sp-sm);margin-bottom:var(--sp-lg)"></div>
+
+    <!-- Map -->
+    <div id="ew-map" style="width:100%;border-radius:var(--radius-lg);border:1px solid var(--clr-border);background:#EAF3E6;overflow:hidden;cursor:pointer;position:relative"></div>
+
+    <!-- Legend -->
+    <div style="display:flex;flex-wrap:wrap;gap:var(--sp-md);margin-top:var(--sp-sm);font-size:0.78rem;color:var(--clr-muted)">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C0DD97;margin-right:4px;vertical-align:middle"></span>1–20 人</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#97C459;margin-right:4px;vertical-align:middle"></span>21–60 人</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#5A9A3A;margin-right:4px;vertical-align:middle"></span>61–120 人</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2C5A1C;margin-right:4px;vertical-align:middle"></span>121+ 人</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#D6D0C0;margin-right:4px;vertical-align:middle"></span>尚無資料</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FFD700;border:1.5px solid #B8860B;margin-right:4px;vertical-align:middle"></span>已選取</span>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin:var(--sp-lg) 0">
+      <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);padding:var(--sp-md);text-align:center">
+        <div id="ew-tot" style="font-family:var(--ff-display);font-size:2rem;font-weight:900;color:var(--clr-primary)">0</div>
+        <div style="font-size:0.78rem;color:var(--clr-muted);margin-top:2px">全球總人次</div>
+      </div>
+      <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);padding:var(--sp-md);text-align:center">
+        <div id="ew-nat" style="font-family:var(--ff-display);font-size:2rem;font-weight:900;color:var(--clr-primary)">0</div>
+        <div style="font-size:0.78rem;color:var(--clr-muted);margin-top:2px">參與國家</div>
+      </div>
+      <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-md);padding:var(--sp-md);text-align:center">
+        <div id="ew-lead" style="font-family:var(--ff-display);font-size:1.5rem;font-weight:900;color:var(--clr-primary)">—</div>
+        <div style="font-size:0.78rem;color:var(--clr-muted);margin-top:2px">領先國家</div>
+      </div>
+    </div>
+
+    <!-- Rank + Join side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-xl)">
+
+      <!-- Rank -->
+      <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:var(--sp-xl)">
+        <h3 style="font-size:1rem;margin-bottom:var(--sp-md)">🏆 國家排行榜</h3>
+        <div id="ew-rank"></div>
+      </div>
+
+      <!-- Join -->
+      <div style="background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);padding:var(--sp-xl)">
+        <h3 style="font-size:1rem;margin-bottom:var(--sp-md)">📍 加入行動</h3>
+        <div id="ew-seltag" style="display:none;align-items:center;gap:6px;margin-bottom:8px;padding:4px 12px;background:#DFF0DF;border-radius:var(--radius-xl);color:var(--clr-primary);font-size:0.82rem;font-weight:600;width:fit-content"></div>
+        <label style="font-size:0.82rem;color:var(--clr-muted);display:block;margin-bottom:4px">選擇你的國家</label>
+        <select id="ew-cty" style="width:100%;padding:0.5rem 0.75rem;border:1px solid var(--clr-border);border-radius:var(--radius-sm);background:var(--clr-bg);font-family:var(--ff-body);font-size:0.88rem;margin-bottom:var(--sp-md)"></select>
+        <label style="font-size:0.82rem;color:var(--clr-muted);display:block;margin-bottom:var(--sp-sm)">選擇你正在進行的行動（可複選）</label>
+        <div id="ew-ja" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:var(--sp-md)"></div>
+        <button id="ew-sub" class="btn btn-primary" style="width:100%;justify-content:center">登記我的行動</button>
+        <p id="ew-toast" style="font-size:0.82rem;color:var(--clr-primary);text-align:center;margin-top:var(--sp-sm);min-height:20px"></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+(function(){
+  const ACTS=[
+    {id:'consumption',label:'減少過度消費',icon:'🛒'},
+    {id:'plastic',label:'拒絕一次性塑膠',icon:'♻️'},
+    {id:'food',label:'避免食物浪費',icon:'🍱'},
+    {id:'fashion',label:'拒絕快時尚',icon:'👕'},
+    {id:'ewaste',label:'正確回收電子',icon:'💻'},
+    {id:'energy',label:'節能減碳',icon:'⚡'},
+  ];
+  const CTYS=['台灣','日本','南韓','中國','美國','英國','德國','法國','澳洲','加拿大',
+    '印度','巴西','墨西哥','荷蘭','瑞典','丹麥','挪威','芬蘭','西班牙','義大利',
+    '新加坡','泰國','印尼','馬來西亞','菲律賓','越南','阿根廷','南非','奈及利亞','埃及'];
+  const ISO={
+    '台灣':158,'日本':392,'南韓':410,'中國':156,'美國':840,'英國':826,'德國':276,
+    '法國':250,'澳洲':36,'加拿大':124,'印度':356,'巴西':76,'墨西哥':484,'荷蘭':528,
+    '瑞典':752,'丹麥':208,'挪威':578,'芬蘭':246,'西班牙':724,'義大利':380,
+    '新加坡':702,'泰國':764,'印尼':360,'馬來西亞':458,'菲律賓':608,'越南':704,
+    '阿根廷':32,'南非':710,'奈及利亞':566,'埃及':818
+  };
+  const ISO_R={};
+  Object.entries(ISO).forEach(([n,v])=>ISO_R[String(v)]=n);
+
+  function seed(){
+    const d={};
+    ACTS.forEach(a=>{
+      d[a.id]={};
+      [['台灣',87],['日本',134],['南韓',72],['美國',201],['英國',95],
+       ['德國',112],['澳洲',58],['加拿大',66],['瑞典',143],['丹麥',91],
+       ['挪威',88],['法國',74],['印度',43],['巴西',31],['荷蘭',55],
+       ['新加坡',39],['芬蘭',62],['義大利',47],['西班牙',51]
+      ].forEach(([c,b])=>{d[a.id][c]=Math.max(1,b+Math.round((Math.random()-.5)*20));});
+    });
+    return d;
+  }
+
+  let data=seed(), curAct='consumption', selActs=new Set(['consumption']), selCty=null, topo=null, svgNode=null;
+
+  function ecoClr(v){
+    if(!v)return'#D6D0C0';
+    if(v<=20)return'#C0DD97'; if(v<=60)return'#97C459';
+    if(v<=120)return'#5A9A3A'; return'#2C5A1C';
+  }
+
+  function renderPills(){
+    document.getElementById('ew-pills').innerHTML=ACTS.map(a=>`
+      <button onclick="_ew2.setAct('${a.id}')" style="
+        display:inline-flex;align-items:center;gap:6px;padding:0.4rem 1rem;
+        border-radius:var(--radius-xl);font-family:var(--ff-body);cursor:pointer;
+        border:2px solid ${a.id===curAct?'var(--clr-primary)':'var(--clr-border)'};
+        background:${a.id===curAct?'#DFF0DF':'var(--clr-surface)'};
+        color:${a.id===curAct?'var(--clr-primary)':'var(--clr-muted)'};
+        font-size:0.82rem;font-weight:${a.id===curAct?'600':'400'};
+        box-shadow:0 2px 8px rgba(0,0,0,0.12)
+      ">${a.icon} ${a.label}</button>
+    `).join('');
+  }
+
+  function renderStats(){
+    const d=data[curAct]||{};
+    const tot=Object.values(d).reduce((s,v)=>s+v,0);
+    document.getElementById('ew-tot').textContent=tot;
+    document.getElementById('ew-nat').textContent=Object.keys(d).length;
+    document.getElementById('ew-lead').textContent=Object.entries(d).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+  }
+
+  function renderRank(){
+    const d=data[curAct]||{};
+    const sorted=Object.entries(d).sort((a,b)=>b[1]-a[1]).slice(0,9);
+    const max=sorted[0]?.[1]||1;
+    document.getElementById('ew-rank').innerHTML=sorted.map(([c,v],i)=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:0.83rem${c===selCty?';color:var(--clr-primary)':''}">
+        <span style="width:16px;text-align:right;color:var(--clr-muted);font-size:0.75rem">${i+1}</span>
+        <span style="flex:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${c===selCty?'font-weight:600;color:var(--clr-primary)':''}">${c===selCty?'→ ':''}${c}</span>
+        <div style="flex:3;height:5px;background:var(--clr-border);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(v/max*100)}%;background:${c===selCty?'var(--clr-accent)':'var(--clr-primary)'};border-radius:3px;transition:width .5s"></div>
+        </div>
+        <span style="font-size:0.75rem;color:var(--clr-muted);min-width:24px;text-align:right">${v}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderMap(){
+    if(!topo)return;
+    const wrap=document.getElementById('ew-map');
+    if(svgNode){svgNode.remove();}
+    const W=wrap.clientWidth||500;
+    const H=Math.round(W*0.5);
+    const svg=d3.select(wrap).insert('svg','*')
+      .attr('viewBox',`0 0 ${W} ${H}`)
+      .attr('width','100%').attr('height',H).style('display','block');
+    svgNode=svg.node();
+    const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
+    const path=d3.geoPath(proj);
+    const d=data[curAct]||{};
+    const tt=document.createElement('div');
+    tt.style.cssText='pointer-events:none;padding:5px 10px;background:#fff;border:1px solid #D6D0C0;border-radius:8px;font-size:12px;color:#3D3D2E;white-space:nowrap;position:absolute;display:none;z-index:10';
+    wrap.appendChild(tt);
+
+    svg.selectAll('path').data(topojson.feature(topo,topo.objects.countries).features).join('path')
+      .attr('d',path)
+      .attr('fill',f=>{const n=ISO_R[String(f.id)];return n===selCty?'#FFD700':ecoClr(n?d[n]||0:0);})
+      .attr('stroke','#fff').attr('stroke-width',0.4)
+      .style('cursor',f=>ISO_R[String(f.id)]?'pointer':'default')
+      .on('mousemove',function(event,f){
+        const n=ISO_R[String(f.id)];
+        if(!n){tt.style.display='none';return;}
+        const r=wrap.getBoundingClientRect();
+        tt.textContent=`${n}：${d[n]||0} 人`;
+        tt.style.display='block';
+        let lx=event.clientX-r.left+12, ly=event.clientY-r.top+12;
+        if(lx+tt.offsetWidth>W-8)lx=event.clientX-r.left-tt.offsetWidth-8;
+        tt.style.left=lx+'px'; tt.style.top=ly+'px';
+      })
+      .on('mouseleave',()=>{tt.style.display='none';})
+      .on('click',(event,f)=>{
+        const n=ISO_R[String(f.id)];
+        if(!n)return;
+        selCty=n;
+        document.getElementById('ew-cty').value=n;
+        const tag=document.getElementById('ew-seltag');
+        tag.style.display='flex'; tag.textContent='📍 '+n;
+        renderAll();
+      });
+  }
+
+  function renderJoin(){
+    document.getElementById('ew-ja').innerHTML=ACTS.map(a=>`
+      <button onclick="_ew2.toggleAct('${a.id}')" style="
+        padding:7px 4px;font-size:0.75rem;border-radius:var(--radius-sm);text-align:center;
+        border:1.5px solid ${selActs.has(a.id)?'var(--clr-primary)':'var(--clr-border)'};
+        background:${selActs.has(a.id)?'#DFF0DF':'var(--clr-surface)'};
+        color:${selActs.has(a.id)?'var(--clr-primary)':'var(--clr-muted)'};
+        cursor:pointer;font-family:var(--ff-body);line-height:1.4
+      ">${a.icon}<br/>${a.label.length>5?a.label.slice(0,5)+'…':a.label}</button>
+    `).join('');
+  }
+
+  function renderAll(){ renderPills(); renderStats(); renderRank(); renderMap(); }
+
+  const ctyEl=document.getElementById('ew-cty');
+  CTYS.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;ctyEl.appendChild(o);});
+  ctyEl.addEventListener('change',()=>{
+    selCty=ctyEl.value;
+    const tag=document.getElementById('ew-seltag');
+    tag.style.display='flex'; tag.textContent='📍 '+selCty;
+    renderAll();
+  });
+
+  document.getElementById('ew-sub').addEventListener('click',()=>{
+    const c=ctyEl.value, t=document.getElementById('ew-toast');
+    if(selActs.size===0){t.textContent='請選擇至少一項行動！';return;}
+    selActs.forEach(aid=>{if(!data[aid])data[aid]={};data[aid][c]=(data[aid][c]||0)+1;});
+    t.textContent=`✅ ${c} 已登記 ${selActs.size} 項行動！`;
+    setTimeout(()=>{t.textContent='';},3000);
+    renderAll();
+  });
+
+  window._ew2={
+    setAct:id=>{curAct=id;renderAll();},
+    toggleAct:id=>{selActs.has(id)?selActs.delete(id):selActs.add(id);renderJoin();}
+  };
+
+  renderJoin(); renderAll();
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(t=>{topo=t;renderMap();});
+  window.addEventListener('resize',()=>renderMap());
+})();
+</script>
+
   <!-- Footer -->
   <footer style="background:var(--clr-dark);color:rgba(255,255,255,0.6);padding:var(--sp-xl) 0;text-align:center;font-size:0.85rem">
     <div class="container">
